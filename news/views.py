@@ -1,9 +1,15 @@
-from django.shortcuts import reverse_lazy,render, get_object_or_404
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView
+from django.urls import reverse_lazy
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from .filters import AuthorFilter
-from .models import Author
+from .models import Author,Post
 from .forms import NewsForm
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from .mixins import AuthorRequiredMixin
 
 
 def news_list(request):
@@ -51,10 +57,11 @@ class NewsUpdate(UpdateView):
     template_name = 'news/news_form.html'
 
 
-class ArticleUpdate(UpdateView):
+class ArticleUpdate(LoginRequiredMixin,UpdateView):
     model = Author
     form_class = NewsForm
     template_name = 'articles/article_form.html'
+    success_url = reverse_lazy('article_list')
 
 
 class NewsDelete(DeleteView):
@@ -67,3 +74,26 @@ class ArticleDelete(DeleteView):
     model = Author
     template_name = 'articles/article_delete.html'
     success_url = reverse_lazy('news_list')  # Перенаправляем на список новостей/статей
+
+@login_required
+def become_author(request):
+    user = request.user
+    authors_group = Group.objects.get(name='authors')
+    user.groups.add(authors_group)
+    return redirect('home')
+
+
+class PostCreateView(AuthorRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'content']
+    template_name = 'post_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+
+class PostUpdateView(AuthorRequiredMixin, UpdateView):
+    model = Post
+    fields = ['title', 'content']
+    template_name = 'post_form.html'

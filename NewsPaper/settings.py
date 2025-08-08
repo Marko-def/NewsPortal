@@ -37,8 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'news'
+    'news',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
+
+SITE_ID = 1
 
 
 MIDDLEWARE = [
@@ -49,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'NewsPaper.urls'
@@ -122,3 +130,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Для стандартного входа
+    'allauth.account.auth_backends.AuthenticationBackend',  # Для allauth
+)
+
+LOGIN_REDIRECT_URL = '/'  # URL, на который будет перенаправлен пользователь после входа
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'  # URL, на который будет перенаправлен пользователь после выхода
+ACCOUNT_EMAIL_REQUIRED = True  # Требовать email при регистрации
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Обязательная проверка email
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True  # Перенаправление после успешного входа
+
+ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}
+
+LOGIN_URL = '/accounts/login/'  # URL для страницы входа

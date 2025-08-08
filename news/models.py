@@ -6,6 +6,11 @@ class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
 
+class News(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
     def update_rating(self):
         # Суммируем рейтинг всех статей автора
         post_rating = sum(post.rating * 3 for post in self.post_set.all())

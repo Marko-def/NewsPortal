@@ -1,0 +1,6 @@
+{% if user.is_authenticated %}
+    <form action="{% url 'become_author' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Стать автором</button>
+    </form>
+{% endif %}
