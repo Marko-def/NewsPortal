@@ -1,0 +1,17 @@
+<h1>{{ category.name }}</h1>
+
+{% if user.is_authenticated %}
+    <form action="{% url 'subscribe_to_category' category.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Подписаться</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Войдите</a>, чтобы подписаться на эту категорию.</p>
+{% endif %}
+
+<!-- Список статей в категории -->
+<ul>
+    {% for article in category.article_set.all %}
+        <li>{{ article.title }}</li>
+    {% endfor %}
+</ul>

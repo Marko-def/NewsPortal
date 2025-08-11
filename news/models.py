@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -23,9 +24,14 @@ class News(models.Model):
         self.rating = post_rating + comment_rating + comment_to_posts_rating
         self.save()
 
+    def is_user_limit_exceeded(self):
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_news_count = News.objects.filter(author=self.author, created_at__gte=today_start).count()
+        return today_news_count >= 3
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    subscribers = models.ManyToManyField(User, related_name='subscriptions', blank=True)
 
 
 class Post(models.Model):

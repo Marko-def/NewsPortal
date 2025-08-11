@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'news',
     'django.contrib.sites',
+    'appointment',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'django_apscheduler',
 ]
 
 SITE_ID = 1
@@ -142,6 +144,17 @@ ACCOUNT_EMAIL_REQUIRED = True  # Требовать email при регистр�
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Обязательная проверка email
 ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True  # Перенаправление после успешного входа
 
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
 ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}
 
 LOGIN_URL = '/accounts/login/'  # URL для страницы входа
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.your_email_provider.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@example.com'
+EMAIL_HOST_PASSWORD = 'your_email_password'
+DEFAULT_FROM_EMAIL = ''

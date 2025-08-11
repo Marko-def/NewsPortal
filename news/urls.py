@@ -1,13 +1,15 @@
-from django.urls import path
+from django.urls import path,include
 from .views import (news_list, news_detail,
-    NewsCreate,
-    ArticleCreate,
-    NewsUpdate,
-    ArticleUpdate,
-    NewsDelete,
-    ArticleDelete,
-    PostCreateView, PostUpdateView
-)
+                    NewsCreate,
+                    ArticleCreate,
+                    NewsUpdate,
+                    ArticleUpdate,
+                    NewsDelete,
+                    ArticleDelete,
+                    PostCreateView, PostUpdateView,
+                    subscribe_to_category,
+create_news,
+                    )
 urlpatterns = [
     path('news/', news_list, name='news_list'),
     path('<int:id>/', news_detail, name='news_detail'),
@@ -21,4 +23,8 @@ urlpatterns = [
     path('articles/<int:pk>/delete/', ArticleDelete.as_view(), name='article_delete'),
     path('post/create/', PostCreateView.as_view(), name='post_create'),
     path('post/<int:pk>/edit/', PostUpdateView.as_view(), name='post_edit'),
+    path('subscribe/<int:category_id>/', subscribe_to_category, name='subscribe_to_category'),
+    path('appointments/', include(('appointment.urls', 'appointments'), namespace='appointments')),
+    path('accounts/', include('allauth.urls')),
+    path('create_news/', create_news, name='create_news'),
 ]

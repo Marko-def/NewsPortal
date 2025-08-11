@@ -1,16 +1,41 @@
 from django.urls import reverse_lazy
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from .filters import AuthorFilter
-from .models import Author,Post
+from .models import Author,Post,Category,News
 from .forms import NewsForm
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from .mixins import AuthorRequiredMixin
+from .tasks import notify_subscribers
 
+def create_news(request):
+    if request.method == 'POST':
+        title = request.POST['title']
+        content = request.POST['content']
+        category_id = request.POST['category']
+
+        news = News(title=title, content=content, category_id=category_id, author=request.user)
+
+        if news.is_user_limit_exceeded():
+            return render(request, 'create_news.html', {'error': 'Вы не можете публиковать более 3 новостей в сутки.'})
+
+        news.save()
+        notify_subscribers(news)  # Уведомляем подписчиков
+
+        return redirect('news_list')  # Перенаправляем на список новостей
+
+    return render(request, 'create_news.html')
+
+def subscribe_to_category(request, category_id):
+    if request.user.is_authenticated:
+        category = get_object_or_404(Category, id=category_id)
+        category.subscribers.add(request.user)
+        return redirect('category_detail', category_id=category.id)
+    else:
+        return redirect('login')
 
 def news_list(request):
     news = Author.objects.all()  # Получаем все новости
