@@ -4,6 +4,9 @@ from datetime import timedelta
 from .models import PostCategory, News
 from django.template.loader import render_to_string
 from django.urls import reverse
+from celery import shared_task
+from django.core.mail import send_mail
+from .models import Subscriber, News
 
 
 def notify_subscribers(news):
@@ -65,4 +68,28 @@ def notify_subscriber(news):
             from_email='your_email@example.com',
             recipient_list=[subscriber.user.email],
             html_message=message,
+        )
+
+@shared_task
+def send_notification(news_id):
+    news = News.objects.get(id=news_id)
+    subscribers = Subscriber.objects.all()
+    for subscriber in subscribers:
+        send_mail(
+            subject=f'Новое сообщение: {news.title}',
+            message=news.content,
+            from_email='your_email@example.com',
+            recipient_list=[subscriber.email],
+        )
+
+@shared_task
+def weekly_newsletter():
+    news = News.objects.filter(created_at__week=timezone.now().isocalendar()[1])  # Получение новостей за текущую неделю
+    subscribers = Subscriber.objects.all()
+    for subscriber in subscribers:
+        send_mail(
+            subject='Последние новости за неделю',
+            message='\n'.join([news_item.title for news_item in news]),
+            from_email='your_email@example.com',
+            recipient_list=[subscriber.email],
         )
