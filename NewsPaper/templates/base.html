@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News Portal</title>
+</head>
+<body>
+    {% load cache %}
+
+    {% cache 600 menu %}
+        {% include 'menu.html' %}
+    {% endcache %}
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

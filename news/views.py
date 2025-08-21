@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from .mixins import AuthorRequiredMixin
 from .tasks import notify_subscribers
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 def create_news(request):
     if request.method == 'POST':
@@ -122,3 +124,18 @@ class PostUpdateView(AuthorRequiredMixin, UpdateView):
     model = Post
     fields = ['title', 'content']
     template_name = 'post_form.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        cache.delete(f'news_detail_{self.object.id}')
+        return response
+
+@cache_page(300)  # Кэшируем на 5 минут
+def news_detail(request, news_id):
+    news_item = get_object_or_404(News, id=news_id)
+    return render(request, 'news_detail.html', {'news_item': news_item})
+
+@cache_page(60)  # Кэшируем на 1 минуту
+def home(request):
+    latest_news = News.objects.all().order_by('-created_at')[:10]
+    return render(request, 'home.html', {'latest_news': latest_news})
